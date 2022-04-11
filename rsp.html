@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가위바위보 게임</title>
+    <style>
+        #computer{
+            width: 142px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+<div id = "computer"></div>
+<div>
+    <button id = "scissors" class="btn">가위</button>
+    <button id = "rock" class="btn">바위</button>
+    <button id = "paper" class="btn">보</button>
+</div>
+
+<div id = "score">0</div>
+
+<script>
+    const $computer = document.querySelector('#computer');
+    const $score = document.querySelector('#score');
+    const $rock = document.querySelector('#rock');
+    const $scissors = document.querySelector('#scissors');
+    const $paper = document.querySelector('#paper');
+
+    const IMG_URL = './rsp.png';
+
+    $computer.style.background = `url(${IMG_URL}) -464px 0`;
+    $computer.style.background ='auto 200px';
+
+    const rspX ={ //1개의 png에 있는 3개의 이미지를 px에 따라 쪼갬
+        scissors : '0', // 가위
+        rock: '-220px', //바위
+        paper: '-440px', //보
+    };
+
+    let computerChoice = 'scissors';
+
+    const changeComputerHand =() =>{
+        if(computerChoice === 'rock'){
+            computerChoice = 'scissors';
+        }else if(computerChoice ==='scissors'){
+            computerChoice ='paper';
+        }else if(computerChoice ==='paper'){
+            computerChoice ='rock';
+        }
+        $computer.style.background = `url(${IMG_URL}) ${rspX[computerChoice]} 0`;
+        $computer.style.backgroundSize = 'auto 200px';
+    };
+
+    let intervalId = setInterval(changeComputerHand, 50);
+
+    const scoreTable = {
+        rock: 0,
+        scissors: 1,
+        paper: -1,
+    };
+
+
+
+    //clickButton 5번 호출,1번 인터벌, 2번, 3번, 4번, 5번(얘만 intervarId에 저장)
+    //그 다음에 버튼을 클릭하면 5번만 취소 
+
+    /*
+    const clickButton = () =>{
+        clearInterval(intervalId); //클릭하자마자 실행
+        // 점수 계산 및 화면 표시
+        setTimeout(()=>{ //클리어 조건을 명시해줄것
+            clearInterval(intervalId); //중복이 아닌 실행되는 시간이 다르기 때문에 각 필요함.
+            intervalId = setInterval(changeComputerHand, 50); // 달라진 값을 변수에 다시 저장한다
+        }, 1000); //밀리초 1초, 버튼을 여러번 클릭시 계속 중복되는 현상이 생긴다 -> 계속 빨라짐
+    };
+    */
+    
+    //removeEventLitsener메서드도 있음.
+
+    let clickable = true;
+    let score = 0;
+    const clickButton = ()=>{
+        if(clickable){
+            clearInterval(intervalId);
+            clickable = false;
+            // 점수 계산 및 화면 표시
+            const myChoice = event.target.textContent ==='바위'  //(조건식) ? 참:거짓 
+                ? 'rock'
+                : event.target.textContent ==='가위'
+                    ?'scissors'
+                    :'paper';
+            
+            //규칙을 찾으면 코드가 줄어든다. 
+            const myScore = scoreTable[myChoice];
+            const computerScore = scoreTable[computerChoice];
+            const diff = myScore - computerScore;
+            // if(diff === 2 || diff === -1){ //[2, -1].includes(diff)으로 바꿀 수 있다 -> 배열로 만들기
+            //     console.log('승리');
+            // }else if(diff === -2 || diff === 1){ 
+            //     console.log('패배');
+            // }else{
+            //     console.log('무승부');
+            // }
+
+            let message;
+            // 2, -1은 승리조건이고, -2, 1은 패배 조건 -> 점수표 만들어보기
+            if([2, -1].includes(diff)){
+                score += 1;
+                message = '승리';
+            }else if ([-2, 1].includes(diff)){
+                score -= 1;
+                message = '패배';
+            }else{
+                message = '무승부';
+            }
+            $score.textContent = `${message} 총 : ${score}점`;
+
+            setTimeout(() => {
+                clickable = true;
+                intervalId = setInterval(changeComputerHand, 50);
+            }, 1000);
+        }
+    };
+
+    $rock.addEventListener('click', clickButton);
+    $scissors.addEventListener('click', clickButton);
+    $paper.addEventListener('click', clickButton);
+    
+
+
+</script>
+
+</body>
+</html>
