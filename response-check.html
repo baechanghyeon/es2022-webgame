@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>반응 속도 측정t</title>
+<style>
+    #screen {
+        width: 300px;
+        height: 200px;
+        text-align: center;
+        user-select: none;
+    }
+    #screen.waiting {
+        background-color: aqua;
+    }
+    #screen.ready {
+        background-color: red;
+        color: white;
+    }
+    #screen.now {
+        background-color: greenyellow;
+    }
+    /*class가 사용되는 경우 -- 여러개의 tag를 동시에 선택하고 싶을 때 class사용 , 특정한 역할에 태그에 부여가 되어있을 경우*/
+</style>
+</head>
+
+<body>
+    <div id="screen" class ="waiting">클릭해서 시작하세요</div>
+    <div id="result"></div>
+    <script>
+        const $screen = document.querySelector('#screen');
+        const $result = document.querySelector('#result');    
+
+        let startTime;
+        let endTime;
+        //전역 scope, 변수 선언 위치도 영향이 많이 간다.
+        const records = [];
+        let timeoutId;
+        $screen.addEventListener('click', (event)=>{
+            if(event.target.classList.contains('waiting')){ //파랑
+                $screen.classList.remove('waiting');
+                $screen.classList.add('ready');
+                $screen.textContent = '초록색이 되면 클릭하세요';
+                timeoutId = setTimeout(function (){
+                    startTime = new Date();
+                    $screen.classList.remove('ready');
+                    $screen.classList.add('now');
+                    $screen.textContent ='클릭 하시오 !!';
+                    // 첫 시간 재기
+                }, Math.floor(Math.random() * 1000) + 2000); // 2000 ~ 3000 사이 수 (2초에서 3초 사이)
+                // 2000 ~ 2999 자연수
+            } else if(event.target.classList.contains('ready')){ //빨강
+                clearTimeout(timeoutId); //타이머는 필요없을 때 제거 해야 버그가 안 생긴다.
+                $screen.classList.remove('ready');
+                $screen.classList.add('waiting');
+                $screen.textContent ='너무 성급하시군요!';
+            } else if(event.target.classList.contains('now')){ // 초록
+                endTime = new Date();
+                const current = endTime - startTime;
+                records.push(current); //배열에 측정값 넣기
+                const average = records.reduce((a, c) => a + c) / records.length; //평균값 구하기
+                $result.textContent = `현재 ${current}ms, 평균 : ${average}ms`;
+                startTime = null; //예전 값이 다시 쓰이는 것을 막기위한 예방 
+                endTime = null;
+
+                $screen.classList.remove('now');
+                $screen.classList.add('waiting');
+                $screen.textContent -'클릭해서 시작하세요';
+            }
+        });
+    </script>
+</body>
+</html>
